@@ -1,6 +1,6 @@
 {
   "name": "booth-mcp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Read-only MCP server for safely querying the BOOTH seller dashboard",
   "type": "module",
   "bin": {
