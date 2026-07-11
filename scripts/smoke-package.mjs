@@ -43,6 +43,7 @@ try {
     cwd: process.cwd(),
     stderr: "pipe",
   });
+  transport.stderr?.pipe(process.stderr);
   client = new Client({ name: "booth-mcp-package-smoke", version: "1.0.0" });
   await client.connect(transport);
 

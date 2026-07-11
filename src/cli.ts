@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { realpathSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { runInteractiveLogin } from "./browser/client.js";
 import { startStdioServer } from "./server.js";
@@ -20,7 +21,7 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
   await startStdioServer();
 }
 
-const invokedPath = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
+const invokedPath = process.argv[1] ? pathToFileURL(realpathSync(process.argv[1])).href : "";
 if (import.meta.url === invokedPath) {
   main().catch((error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
