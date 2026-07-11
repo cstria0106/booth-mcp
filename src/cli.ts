@@ -3,6 +3,8 @@ import { pathToFileURL } from "node:url";
 import { runInteractiveLogin } from "./browser/client.js";
 import { startStdioServer } from "./server.js";
 
+export * from "./index.js";
+
 export async function main(args = process.argv.slice(2)): Promise<void> {
   const command = args[0];
   if (command === "login") {

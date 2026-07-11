@@ -20,7 +20,7 @@ BOOTH 계정에 대한 생성, 수정, 공개, 발송 처리, 메시지 전송, 
 ## 요구 사항
 
 - Node.js 20 이상
-- npm 또는 pnpm
+- npm 또는 Bun 1.3 이상
 - 최초 로그인 시 화면을 표시할 수 있는 데스크톱 환경
 - Google Chrome 또는 Microsoft Edge
 
@@ -146,7 +146,7 @@ Cursor MCP 설정에 추가합니다.
 
 ## 오류 코드
 
-- `AUTH_REQUIRED`: `npx booth-mcp login`으로 로그인 또는 재로그인이 필요함
+- `AUTH_REQUIRED`: `booth_login` 도구 호출 또는 `npx booth-mcp login`으로 로그인이 필요함
 - `NOT_FOUND`: 상품·주문·대화를 찾을 수 없거나 ID가 올바르지 않음
 - `BOOTH_CHANGED`: BOOTH 화면 구조를 안전하게 인식할 수 없음
 - `RATE_LIMITED`: BOOTH가 요청을 제한함
@@ -155,18 +155,20 @@ Cursor MCP 설정에 추가합니다.
 ## 개발
 
 ```bash
-pnpm install
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm build
-pnpm pack --dry-run
+bun install
+bun run lint
+bun run typecheck
+bun run test
+bun run build
+bun publish --dry-run
 ```
+
+배포 빌드는 MCP SDK, Zod, Cheerio와 프로젝트 코드를 Node.js용 단일 `dist/cli.js`로 번들합니다. 시스템 브라우저 제어에 필요한 `playwright-core`만 외부 런타임 의존성으로 유지하며 Chromium 실행 파일은 포함하지 않습니다.
 
 실제 계정을 사용하는 읽기 전용 smoke test는 명시적으로만 실행됩니다.
 
 ```bash
-pnpm test:live
+bun run test:live
 ```
 
 테스트 fixture는 가상 데이터만 포함하며 실제 주문·메시지·세션을 저장소에 커밋하지 않습니다.
