@@ -19,10 +19,27 @@ try {
   if (packed.status !== 0) throw new Error(packed.stderr || "npm pack failed");
 
   const archive = resolve(destination, JSON.parse(packed.stdout)[0].filename);
+  const installed = spawnSync(
+    npm,
+    [
+      ...npmArgs,
+      "install",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund",
+      "--prefix",
+      destination,
+      archive,
+    ],
+    { cwd: process.cwd(), encoding: "utf8" },
+  );
+  if (installed.error) throw installed.error;
+  if (installed.status !== 0) throw new Error(installed.stderr || "npm install failed");
+
   const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   const transport = new StdioClientTransport({
-    command: process.platform === "win32" ? "npm.cmd" : "npm",
-    args: ["exec", "--yes", `--package=${archive}`, "--", "booth-mcp"],
+    command: resolve(destination, "node_modules", ".bin", process.platform === "win32" ? "booth-mcp.cmd" : "booth-mcp"),
+    args: [],
     cwd: process.cwd(),
     stderr: "pipe",
   });
