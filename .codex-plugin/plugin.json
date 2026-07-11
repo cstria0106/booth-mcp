@@ -1,6 +1,6 @@
 {
   "name": "booth-mcp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Read-only tools for safely querying BOOTH seller products, orders, sales, and customer conversations",
   "author": {
     "name": "cstria0106",
