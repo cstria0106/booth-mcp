@@ -39,6 +39,13 @@
     "model-context-protocol",
     "pixiv"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cstria0106/booth-mcp.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.29.0",
