@@ -1,0 +1,55 @@
+{
+  "name": "booth-mcp",
+  "version": "0.1.0",
+  "description": "BOOTH 판매자 페이지를 안전하게 조회하는 읽기 전용 MCP 서버",
+  "type": "module",
+  "bin": {
+    "booth-mcp": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/clean-dist.mjs && tsc -p tsconfig.build.json",
+    "dev": "tsx src/cli.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:live": "cross-env BOOTH_MCP_LIVE=1 vitest run tests/live",
+    "prepack": "pnpm build"
+  },
+  "keywords": [
+    "booth",
+    "mcp",
+    "model-context-protocol",
+    "pixiv"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "cheerio": "1.1.2",
+    "playwright-core": "1.61.1",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.2",
+    "@types/node": "25.0.3",
+    "cross-env": "10.1.0",
+    "eslint": "9.39.2",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.53.1",
+    "vitest": "4.0.18"
+  },
+  "packageManager": "pnpm@11.5.2"
+}

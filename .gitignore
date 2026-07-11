@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+*.tgz
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+npm-debug.log*
+pnpm-debug.log*
+playwright-report/
+test-results/
+
+# Local BOOTH credentials and browser state
+session.json
+browser-profile/
