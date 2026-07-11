@@ -77,9 +77,27 @@ Windows의 기본 저장 위치는 다음과 같습니다.
 
 ## MCP 클라이언트 설정
 
-### Codex
+### Codex 플러그인 설치 (권장)
 
-Codex 설정에 다음 서버를 추가합니다.
+Codex에서는 MCP 설정과 `booth` 스킬을 함께 설치할 수 있습니다. 스킬은 판매자 샵, 상품, 주문, 매출, 고객 문의 관련 요청에서 BOOTH 도구를 능동적으로 선택하도록 안내합니다.
+
+```bash
+codex plugin marketplace add cstria0106/booth-mcp
+codex plugin add booth-mcp@booth-mcp
+```
+
+설치하거나 업데이트한 뒤에는 새 작업을 시작하세요. 자동으로 선택되지 않는 요청에서는 `$booth`를 명시해 호출할 수도 있습니다.
+
+플러그인 marketplace를 업데이트하려면 다음 명령을 실행한 뒤 플러그인을 다시 추가하고 새 작업을 시작합니다.
+
+```bash
+codex plugin marketplace upgrade booth-mcp
+codex plugin add booth-mcp@booth-mcp
+```
+
+### Codex 수동 설정
+
+플러그인을 사용하지 않거나 MCP 서버를 직접 관리하려는 경우 Codex 설정에 다음 서버를 추가합니다.
 
 ```toml
 [mcp_servers.booth]

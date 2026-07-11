@@ -1,0 +1,37 @@
+{
+  "name": "booth-mcp",
+  "version": "0.1.1",
+  "description": "Read-only tools for safely querying BOOTH seller products, orders, sales, and customer conversations",
+  "author": {
+    "name": "cstria0106",
+    "url": "https://github.com/cstria0106"
+  },
+  "homepage": "https://github.com/cstria0106/booth-mcp#readme",
+  "repository": "https://github.com/cstria0106/booth-mcp",
+  "license": "MIT",
+  "keywords": [
+    "booth",
+    "seller",
+    "sales",
+    "orders",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "BOOTH",
+    "shortDescription": "Read BOOTH seller products, orders, sales, and messages",
+    "longDescription": "Safely query and analyze products, orders, sales, customer conversations, and public shop settings from a BOOTH seller account.",
+    "developerName": "cstria0106",
+    "category": "Productivity",
+    "capabilities": [
+      "Read"
+    ],
+    "websiteURL": "https://github.com/cstria0106/booth-mcp",
+    "defaultPrompt": [
+      "Summarize my BOOTH shop and recent sales.",
+      "Show the BOOTH orders that need attention.",
+      "Show my recent BOOTH customer conversations."
+    ]
+  }
+}

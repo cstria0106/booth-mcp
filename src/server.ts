@@ -5,6 +5,7 @@ import { z } from "zod";
 import { runInteractiveLogin } from "./browser/client.js";
 import { asBoothError } from "./errors.js";
 import { BoothService } from "./service.js";
+import { PACKAGE_VERSION } from "./version.js";
 
 export const READ_ONLY_ANNOTATIONS = {
   readOnlyHint: true,
@@ -36,7 +37,7 @@ export function createServer(
   login: () => Promise<void> = runInteractiveLogin,
 ): { server: McpServer; service: BoothService } {
   const server = new McpServer(
-    { name: "booth-mcp", version: "0.1.0" },
+    { name: "booth-mcp", version: PACKAGE_VERSION },
     {
       instructions:
         "Read-only access to the user's BOOTH seller account. Use these tools for questions about their BOOTH shop, products, orders, sales, or customer conversations. The tools do not modify BOOTH data or download files. If a tool returns AUTH_REQUIRED, tell the user that they must sign in before calling booth_login.",

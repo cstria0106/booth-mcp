@@ -1,6 +1,10 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
+
+const packageVersion = (JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as { version: string })
+  .version;
 
 let client: Client | undefined;
 
@@ -19,6 +23,7 @@ describe("stdio MCP contract", () => {
     });
     client = new Client({ name: "booth-mcp-contract-test", version: "1.0.0" });
     await client.connect(transport);
+    expect(client.getServerVersion()).toMatchObject({ name: "booth-mcp", version: packageVersion });
     const response = await client.listTools();
     expect(response.tools.map((tool) => tool.name)).toEqual([
       "booth_login",

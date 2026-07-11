@@ -1,7 +1,7 @@
 {
   "name": "booth-mcp",
   "version": "0.1.1",
-  "description": "BOOTH 판매자 페이지를 안전하게 조회하는 읽기 전용 MCP 서버",
+  "description": "Read-only MCP server for safely querying the BOOTH seller dashboard",
   "type": "module",
   "bin": {
     "booth-mcp": "dist/cli.js"
@@ -16,6 +16,9 @@
   },
   "files": [
     "dist",
+    ".codex-plugin",
+    ".mcp.json",
+    "skills",
     "README.md",
     "LICENSE"
   ],
@@ -31,7 +34,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:live": "cross-env BOOTH_MCP_LIVE=1 vitest run tests/live",
-    "prepack": "bun run build"
+    "check:version": "node scripts/sync-version.mjs --check",
+    "check:distribution": "bun run check:version && node scripts/validate-distribution.mjs",
+    "check:package": "node scripts/check-package-files.mjs",
+    "check:package-smoke": "node scripts/smoke-package.mjs",
+    "version": "node scripts/sync-version.mjs",
+    "prepack": "bun run check:distribution && bun run build"
   },
   "keywords": [
     "booth",
