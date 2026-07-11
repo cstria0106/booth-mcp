@@ -39,14 +39,14 @@ export function createServer(
     { name: "booth-mcp", version: "0.1.0" },
     {
       instructions:
-        "BOOTH 판매자 정보를 읽기 전용으로 조회합니다. 변경·다운로드·CSV 발행·지급 관련 작업은 제공하지 않습니다. AUTH_REQUIRED가 반환되면 사용자에게 알린 뒤 booth_login을 호출해 브라우저 로그인을 기다릴 수 있습니다.",
+        "Read-only access to the user's BOOTH seller account. Use these tools for questions about their BOOTH shop, products, orders, sales, or customer conversations. The tools do not modify BOOTH data or download files. If a tool returns AUTH_REQUIRED, tell the user that they must sign in before calling booth_login.",
     },
   );
 
   register(
     server,
     "booth_login",
-    "시스템 Chrome 또는 Edge를 열고 사용자가 BOOTH 로그인을 완료할 때까지 최대 10분 기다린 뒤 로컬 세션을 저장합니다. BOOTH 계정 데이터는 변경하지 않습니다.",
+    "Sign in to BOOTH for subsequent seller-account queries. Use when the user asks to connect BOOTH or after another BOOTH tool returns AUTH_REQUIRED. Opens Chrome or Edge and waits up to 10 minutes for the user to finish signing in.",
     {},
     async () => {
       await login();
@@ -62,14 +62,26 @@ export function createServer(
     },
     LOGIN_ANNOTATIONS,
   );
-  register(server, "booth_auth_status", "BOOTH 판매자 로그인 상태와 샵 식별 정보를 확인합니다.", {}, () => service.authStatus());
-  register(server, "booth_get_dashboard", "샵 설정과 매출 데이터를 조합해 판매 상태와 최근 매출 요약을 조회합니다.", {}, () => service.dashboard());
+  register(
+    server,
+    "booth_auth_status",
+    "Check whether BOOTH is connected and identify the signed-in seller's shop. Use when the user asks about BOOTH connection or account status.",
+    {},
+    () => service.authStatus(),
+  );
+  register(
+    server,
+    "booth_get_dashboard",
+    "Get an overview of the BOOTH shop's status and recent sales. Use for a general shop summary or recent performance.",
+    {},
+    () => service.dashboard(),
+  );
   register(
     server,
     "booth_list_items",
-    "판매 상품을 공개 상태별로 페이지 조회합니다.",
+    "List products in the BOOTH shop, optionally by publication status. Use for product listings, drafts, or public and private products.",
     {
-      state: z.enum(["all", "draft", "public", "private"]).optional(),
+      state: z.enum(["all", "draft", "public", "private"]).optional().describe("Publication status to include. Defaults to all."),
       page: z.number().int().positive().optional(),
       limit: z.number().int().min(1).max(50).optional(),
     },
@@ -78,17 +90,23 @@ export function createServer(
   register(
     server,
     "booth_get_item",
-    "상품 상세, 설명, 가격, 태그와 디지털 파일 메타데이터를 조회합니다. 파일은 다운로드하지 않습니다.",
-    { itemId: z.string().regex(/^\d+$/u) },
+    "Get one BOOTH product's details, including its description, price, tags, and digital-file metadata. Use when the user refers to a specific product or item ID. Does not download files.",
+    { itemId: z.string().regex(/^\d+$/u).describe("Numeric BOOTH item ID.") },
     ({ itemId }) => service.getItem(itemId),
   );
   register(
     server,
     "booth_list_orders",
-    "주문 목록을 상태와 배송 방식으로 조회합니다. 구매자 닉네임과 식별 코드는 포함될 수 있습니다.",
+    "List BOOTH orders, optionally by order status or fulfillment method. Use for order queues, unpaid orders, completed orders, cancellations, or fulfillment lists.",
     {
-      state: z.enum(["all", "unpaid", "paid", "completed", "cancelled"]).optional(),
-      shipment: z.enum(["all", "direct", "via_warehouse", "factory_item"]).optional(),
+      state: z
+        .enum(["all", "unpaid", "paid", "completed", "cancelled"])
+        .optional()
+        .describe("Order status to include. Defaults to all."),
+      shipment: z
+        .enum(["all", "direct", "via_warehouse", "factory_item"])
+        .optional()
+        .describe("Fulfillment method to include. Defaults to all."),
       page: z.number().int().positive().optional(),
       limit: z.number().int().min(1).max(50).optional(),
     },
@@ -97,16 +115,16 @@ export function createServer(
   register(
     server,
     "booth_get_order",
-    "주문 상세를 조회합니다. 닉네임·주문번호·식별 코드는 표시하고 실명·주소·전화·이메일은 마스킹합니다.",
-    { orderId: z.string().regex(/^\d+$/u) },
+    "Get one BOOTH order's details. Use when the user refers to a specific order ID. Personal contact and address fields are masked.",
+    { orderId: z.string().regex(/^\d+$/u).describe("Numeric BOOTH order ID.") },
     ({ orderId }) => service.getOrder(orderId),
   );
   register(
     server,
     "booth_get_sales",
-    "월별, 일별 또는 상품별 매출을 조회합니다. CSV 발행과 지급 신청은 하지 않습니다.",
+    "Get BOOTH sales broken down by month, day, or product. Use for revenue, sales trends, or product performance. Does not export CSV or request payouts.",
     {
-      granularity: z.enum(["monthly", "daily", "item"]).optional(),
+      granularity: z.enum(["monthly", "daily", "item"]).optional().describe("How to group sales. Defaults to monthly."),
       page: z.number().int().positive().optional(),
       limit: z.number().int().min(1).max(50).optional(),
     },
@@ -115,7 +133,7 @@ export function createServer(
   register(
     server,
     "booth_list_conversations",
-    "판매자 메시지 대화 목록과 상대 닉네임을 조회합니다.",
+    "List customer conversations in the BOOTH seller inbox. Use when the user asks about messages, inquiries, or conversation threads.",
     {
       page: z.number().int().positive().optional(),
       limit: z.number().int().min(1).max(50).optional(),
@@ -125,14 +143,20 @@ export function createServer(
   register(
     server,
     "booth_get_conversation",
-    "대화 상세를 조회합니다. includeContent가 true이면 이메일·전화·우편번호 패턴을 마스킹한 메시지 본문을 포함합니다.",
+    "Get one BOOTH customer conversation. Use when the user refers to a specific conversation or asks to read its messages. Message content is omitted unless includeContent is true, and contact details are masked.",
     {
-      conversationId: z.string().min(4).max(128).regex(/^[\w-]+$/u),
-      includeContent: z.boolean().optional(),
+      conversationId: z.string().min(4).max(128).regex(/^[\w-]+$/u).describe("BOOTH conversation ID."),
+      includeContent: z.boolean().optional().describe("Whether to include masked message text. Defaults to false."),
     },
     ({ conversationId, includeContent }) => service.getConversation(conversationId, includeContent),
   );
-  register(server, "booth_get_shop_settings", "공개 샵 정보와 비금융 운영 설정을 조회합니다.", {}, () => service.getShopSettings());
+  register(
+    server,
+    "booth_get_shop_settings",
+    "Get the BOOTH shop's public profile and non-financial settings. Use for the shop name, URL, description, publication state, or order preferences.",
+    {},
+    () => service.getShopSettings(),
+  );
 
   return { server, service };
 }
