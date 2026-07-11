@@ -44,15 +44,28 @@ export function parsePageFromHref(href: string | undefined): number | undefined 
   }
 }
 
-export function findNextPage($: CheerioAPI, currentPage: number): number | undefined {
-  const relNext = parsePageFromHref($("main a[rel='next']").attr("href"));
+export function findNextPage($: CheerioAPI, currentPage: number, sourceUrl: string): number | undefined {
+  const expectedPathname = new URL(sourceUrl).pathname;
+  const relNextHref = $("main a[rel='next']").attr("href");
+  const relNext = hasPathname(relNextHref, expectedPathname) ? parsePageFromHref(relNextHref) : undefined;
   if (relNext) return relNext;
   let nextPage: number | undefined;
   $("main a[href*='page=']").each((_index, element) => {
-    const candidate = parsePageFromHref($(element).attr("href"));
+    const href = $(element).attr("href");
+    if (!hasPathname(href, expectedPathname)) return;
+    const candidate = parsePageFromHref(href);
     if (candidate === currentPage + 1) nextPage = candidate;
   });
   return nextPage;
+}
+
+function hasPathname(href: string | undefined, expectedPathname: string): boolean {
+  if (!href) return false;
+  try {
+    return new URL(href, "https://manage.booth.pm").pathname === expectedPathname;
+  } catch {
+    return false;
+  }
 }
 
 export function valueOfFirst($: CheerioAPI, selectors: string[]): string | undefined {
@@ -91,14 +104,4 @@ export function extractIdentificationCode(text: string): string | undefined {
   const token = text.match(/(?:Identification Code|識別コード|식별 코드)\s*[:：]\s*([^\s|]{1,64})/iu)?.[1];
   if (!token) return undefined;
   return token.match(/^[0-9a-f]{8}/iu)?.[0] ?? token;
-}
-
-export function textAround($: CheerioAPI, selector: string, levels = 4): string {
-  let node = $(selector).first();
-  for (let index = 0; index < levels && node.length > 0; index += 1) {
-    const text = normalizeText(node.text());
-    if (text.length > 10) return text;
-    node = node.parent();
-  }
-  return normalizeText(node.text());
 }

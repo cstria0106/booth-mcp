@@ -7,7 +7,6 @@ import {
   normalizeText,
   parseDate,
   parseDocument,
-  textAround,
 } from "./common.js";
 
 export function parseConversations(
@@ -16,22 +15,26 @@ export function parseConversations(
   options: { page: number; limit: number },
 ): { conversations: ConversationSummary[]; nextPage?: number; redactions: string[] } {
   const $ = parseDocument(html, sourceUrl);
-  const mainText = normalizeText($("main").text());
-  assertPageMarker(/Messages List|メッセージ|메시지/iu.test(mainText), sourceUrl, "메시지 목록");
+  const conversationList = $("main .message-threads").first();
+  assertPageMarker(conversationList.length > 0, sourceUrl, "메시지 목록");
   const conversations: ConversationSummary[] = [];
   const seen = new Set<string>();
   const redactions = new Set<string>();
 
-  $("main a[href*='/conversations/'][href$='/messages']").each((_index, element) => {
+  conversationList.children("a[href]").each((_index, element) => {
     if (conversations.length >= options.limit) return;
-    const href = $(element).attr("href") ?? "";
-    const id = href.match(/\/conversations\/([^/]+)\/messages/u)?.[1];
+    const card = $(element);
+    const href = card.attr("href") ?? "";
+    const id = href.match(/^\/conversations\/([^/]+)\/messages$/u)?.[1];
     if (!id || seen.has(id)) return;
     seen.add(id);
-    const context = textAround($, `main a[href='${href}']`, 7);
-    const nickname = extractCounterpart(context, id);
+    const context = normalizeText(card.text());
+    const structuralNickname = normalizeText(
+      card.find(".message-customer-name").first().clone().children().remove().end().text(),
+    );
+    const nickname = structuralNickname || extractCounterpart(context, id);
     const identificationCode = extractIdentificationCode(context);
-    const excerptSource = normalizeText($(element).text()) || context.slice(0, 300);
+    const excerptSource = normalizeText(card.children().last().text()) || context.slice(0, 300);
     const redacted = redactSensitiveText(excerptSource);
     const lastMessageAt = parseDate(context);
     redacted.redactions.forEach((entry) => redactions.add(entry));
@@ -40,12 +43,12 @@ export function parseConversations(
       ...(nickname ? { counterpartNickname: nickname } : {}),
       ...(identificationCode ? { identificationCode } : {}),
       ...(lastMessageAt ? { lastMessageAt } : {}),
-      unread: /Unread|未読|읽지 않음/iu.test(context),
+      unread: /(?:^|\s)(?:unread|is-unread)(?:\s|$)/iu.test(card.attr("class") ?? "") || /Unread|未読|읽지 않음/iu.test(context),
       ...(redacted.text ? { excerpt: redacted.text.slice(0, 300) } : {}),
     });
   });
 
-  const nextPage = findNextPage($, options.page);
+  const nextPage = findNextPage($, options.page, sourceUrl);
   return { conversations, ...(nextPage ? { nextPage } : {}), redactions: [...redactions] };
 }
 

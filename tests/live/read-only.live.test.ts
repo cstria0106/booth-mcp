@@ -22,6 +22,11 @@ describe.runIf(process.env.BOOTH_MCP_LIVE === "1")("opt-in live smoke test", () 
       if (firstConversation) {
         expect((await service.getConversation(firstConversation.id, false)).data.id).toBe(firstConversation.id);
       }
+
+      for (const granularity of ["daily", "item"] as const) {
+        const sales = await service.getSales({ granularity, limit: 1 });
+        expect(sales.data.records.length).toBeLessThanOrEqual(1);
+      }
     } finally {
       await service.close();
     }
